@@ -61,37 +61,32 @@ static void custom_log(struct ast_event *event)
 	curl = curl_easy_init();
 	if (curl) {
 		headers = curl_slist_append(headers, "Content-Type: application/json");
-		ast_log(LOG_NOTICE, "Headers");
 
 		curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.0.5:9200/asterisk/cel/");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-		char *post_fields = malloc(sizeof(char) * 4028);
-
-		sprintf(post_fields, "{\"EventName\": \"%s\", \"AccountCode\": \"%s\", 		\
-			   			       \"CallerIDnum\": \"%s\", \"CallerIDname\": \"%s\", 	\
-							   \"CallerIDani\": \"%s\", \"CallerIDrdnis\": \"%s\", 	\
-							   \"CAllerIDdnid\": \"%s\", \"Exten\": \"%s\",			\
-							   \"Context\": \"%s\", \"Channel\": \"%s\", 	 		\
-							   \"Application\": \"%s\", \"AppData\": \"%s\",		\
-							   \"EventTime\": \"%s\", \"AMAFlags\": \"%s\", 	 	\
-							   \"UniqueID\": \"%s\", \"LinkedID\": \"%s\", 	 		\
-							   \"Userfield\": \"%s\", \"Peer\": \"%s\", 	 		\
-							   \"Peeraccount\": \"%s\", \"Extra\": \"%s\" }",
-							    record.event_name, record.account_code, record.caller_id_num,
-							   	record.caller_id_name, record.caller_id_ani, record.caller_id_rdnis,
-								record.caller_id_dnid, record.extension, record.context,
-								record.channel_name, record.application_name, record.application_data,
-								start_time, ast_channel_amaflags2string(record.amaflag),
-								record.unique_id, record.linked_id, record.user_field, record.peer,
-								record.peer_account, record.extra);
-
-		ast_log(LOG_NOTICE, post_fields);
-		ast_log(LOG_NOTICE, "\n");
+		char *post_fields = malloc(sizeof(char) * 6048);
+		sprintf(post_fields, "{\"EventName\": \"%s\", \"AccountCode\": \"%s\",	\
+							\"CallerIDnum\": \"%s\", \"CallerIDname\": \"%s\", 	\
+							\"CallerIDani\": \"%s\", \"CallerIDrdnis\": \"%s\",	\
+							\"CAllerIDdnid\": \"%s\", \"Exten\": \"%s\",		\
+							\"Context\": \"%s\", \"Channel\": \"%s\", 	 		\
+							\"Application\": \"%s\", \"AppData\": \"%s\",		\
+							\"EventTime\": \"%s\", \"AMAFlags\": \"%s\", 	 	\
+							\"UniqueID\": \"%s\", \"LinkedID\": \"%s\", 	 	\
+							\"Userfield\": \"%s\", \"Peer\": \"%s\", 	 		\
+							\"Peeraccount\": \"%s\", \"Extra\": \"%s\" }",
+							record.event_name, record.account_code, record.caller_id_num,
+							record.caller_id_name, record.caller_id_ani, record.caller_id_rdnis,
+							record.caller_id_dnid, record.extension, record.context,
+							record.channel_name, record.application_name, record.application_data,
+							start_time, ast_channel_amaflags2string(record.amaflag),
+							record.unique_id, record.linked_id, record.user_field, record.peer,
+							record.peer_account, record.extra);
 
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
 
-		res = curl_easy_perform(curl);
+		curl_easy_perform(curl);
 		curl_slist_free_all(headers);
 		curl_easy_cleanup(curl);
 		free(post_fields);
