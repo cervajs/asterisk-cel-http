@@ -1,21 +1,12 @@
 /*
  * Asterisk -- An open source telephony toolkit.
  *
- * Copyright (C) 2009, Digium, Inc.
+ * Copyright (C) 2015, House of the Hat, where the baby cries 
+ * and the mother dont see.
  *
- * Steve Murphy <murf@digium.com>
- * much borrowed from cdr code (cdr_custom.c), author Mark Spencer
- *
- * See http://www.asterisk.org for more information about
- * the Asterisk project. Please do not directly contact
- * any of the maintainers of this project for assistance;
- * the project provides a web site, mailing lists and IRC
- * channels for your use.
- *
- * This program is free software, distributed under the terms of
- * the GNU General Public License Version 2. See the LICENSE file
- * at the top of the source tree.
+ * Amim Knabben - amim.knabben@gmail.com
  */
+
 /*** MODULEINFO
 	<depend>CURL</depend>
  ***/
@@ -23,17 +14,19 @@
 
 #include "asterisk.h"
 
-ASTERISK_FILE_VERSION(__FILE__, "$Revision: 419592 $")
+ASTERISK_FILE_VERSION(__FILE__, "$Revision: 1 $")
 
 #include "asterisk/module.h"
 #include "asterisk/logger.h"
 #include "asterisk/cel.h"
+#include "asterisk/json.h"
 
 #include <curl/curl.h>
 
 
 #define AST_MODULE "cel_http"
 #define CUSTOM_BACKEND_NAME "CEL Custom HTTP Logging"
+
 
 AST_THREADSTORAGE(custom_buf);
 
@@ -42,7 +35,7 @@ static const char name[] = "cel-http";
 
 static int unload_module(void)
 {
-	ast_log(LOG_NOTICE, "cya");
+	ast_log(LOG_NOTICE, "Unloading CEL HTTP Module");
 	return 0;
 }
 
@@ -65,25 +58,43 @@ static void custom_log(struct ast_event *event)
 	ast_localtime(&record.event_time, &timeresult, NULL);
 	ast_strftime(start_time, sizeof(start_time), DATE_FORMAT, &timeresult);
 
-	ast_log(LOG_NOTICE, "EventName: %s\r\n", record.user_defined_name);
-	ast_log(LOG_NOTICE, "CalledIDName : %s\r\n", record.caller_id_name);
-
-	ast_log(LOG_NOTICE, "Hello here");
 	curl = curl_easy_init();
 	if (curl) {
-		headers = curl_slist_append(headers, "Accept: application/json");
 		headers = curl_slist_append(headers, "Content-Type: application/json");
 		ast_log(LOG_NOTICE, "Headers");
 
-		curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.0.5:9200/blah/user/");
+		curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.0.5:9200/asterisk/cel/");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "{ \"name\" : \"Anonymous\"}");
-		ast_log(LOG_NOTICE, "OK Sending");
+
+		char *post_fields = malloc(sizeof(char) * 4028);
+
+		sprintf(post_fields, "{\"EventName\": \"%s\", \"AccountCode\": \"%s\", 		\
+			   			       \"CallerIDnum\": \"%s\", \"CallerIDname\": \"%s\", 	\
+							   \"CallerIDani\": \"%s\", \"CallerIDrdnis\": \"%s\", 	\
+							   \"CAllerIDdnid\": \"%s\", \"Exten\": \"%s\",			\
+							   \"Context\": \"%s\", \"Channel\": \"%s\", 	 		\
+							   \"Application\": \"%s\", \"AppData\": \"%s\",		\
+							   \"EventTime\": \"%s\", \"AMAFlags\": \"%s\", 	 	\
+							   \"UniqueID\": \"%s\", \"LinkedID\": \"%s\", 	 		\
+							   \"Userfield\": \"%s\", \"Peer\": \"%s\", 	 		\
+							   \"Peeraccount\": \"%s\", \"Extra\": \"%s\" }",
+							    record.event_name, record.account_code, record.caller_id_num,
+							   	record.caller_id_name, record.caller_id_ani, record.caller_id_rdnis,
+								record.caller_id_dnid, record.extension, record.context,
+								record.channel_name, record.application_name, record.application_data,
+								start_time, ast_channel_amaflags2string(record.amaflag),
+								record.unique_id, record.linked_id, record.user_field, record.peer,
+								record.peer_account, record.extra);
+
+		ast_log(LOG_NOTICE, post_fields);
+		ast_log(LOG_NOTICE, "\n");
+
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
 
 		res = curl_easy_perform(curl);
 		curl_slist_free_all(headers);
 		curl_easy_cleanup(curl);
+		free(post_fields);
 	}
 }
 
@@ -94,7 +105,7 @@ static int load_module(void)
 		return AST_MODULE_LOAD_FAILURE;
 	}
 
-	ast_log(LOG_NOTICE, "Loading HTTP CEL");
+	ast_log(LOG_NOTICE, "Loading HTTP CEL Module");
 	return AST_MODULE_LOAD_SUCCESS;
 }
 
