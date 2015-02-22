@@ -67,25 +67,24 @@ static void custom_log(struct ast_event *event)
 
 		char *post_fields = malloc(sizeof(char) * 6048);
 		sprintf(post_fields, "{\"EventName\": \"%s\", \"AccountCode\": \"%s\",	\
-							\"CallerIDnum\": \"%s\", \"CallerIDname\": \"%s\", 	\
-							\"CallerIDani\": \"%s\", \"CallerIDrdnis\": \"%s\",	\
-							\"CAllerIDdnid\": \"%s\", \"Exten\": \"%s\",		\
-							\"Context\": \"%s\", \"Channel\": \"%s\", 	 		\
-							\"Application\": \"%s\", \"AppData\": \"%s\",		\
-							\"EventTime\": \"%s\", \"AMAFlags\": \"%s\", 	 	\
-							\"UniqueID\": \"%s\", \"LinkedID\": \"%s\", 	 	\
-							\"Userfield\": \"%s\", \"Peer\": \"%s\", 	 		\
-							\"Peeraccount\": \"%s\", \"Extra\": \"%s\" }",
-							record.event_name, record.account_code, record.caller_id_num,
-							record.caller_id_name, record.caller_id_ani, record.caller_id_rdnis,
-							record.caller_id_dnid, record.extension, record.context,
-							record.channel_name, record.application_name, record.application_data,
-							start_time, ast_channel_amaflags2string(record.amaflag),
-							record.unique_id, record.linked_id, record.user_field, record.peer,
-							record.peer_account, record.extra);
+			\"CallerIDnum\": \"%s\", \"CallerIDname\": \"%s\", 	\
+			\"CallerIDani\": \"%s\", \"CallerIDrdnis\": \"%s\",	\
+			\"CAllerIDdnid\": \"%s\", \"Exten\": \"%s\",		\
+			\"Context\": \"%s\", \"Channel\": \"%s\", 	 		\
+			\"Application\": \"%s\", \"AppData\": \"%s\",		\
+			\"EventTime\": \"%s\", \"AMAFlags\": \"%s\", 	 	\
+			\"UniqueID\": \"%s\", \"LinkedID\": \"%s\", 	 	\
+			\"Userfield\": \"%s\", \"Peer\": \"%s\", 	 		\
+			\"Peeraccount\": \"%s\", \"Extra\": \"%s\" }",
+			record.event_name, record.account_code, record.caller_id_num,
+			record.caller_id_name, record.caller_id_ani, record.caller_id_rdnis,
+			record.caller_id_dnid, record.extension, record.context,
+			record.channel_name, record.application_name, record.application_data,
+			start_time, ast_channel_amaflags2string(record.amaflag),
+			record.unique_id, record.linked_id, record.user_field, record.peer,
+			record.peer_account, record.extra);
 
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
-
 		curl_easy_perform(curl);
 		curl_slist_free_all(headers);
 		curl_easy_cleanup(curl);
