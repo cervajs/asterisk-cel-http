@@ -30,7 +30,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revision: 1 $")
 
 AST_THREADSTORAGE(custom_buf);
 
-static const char DATE_FORMAT[] = "%Y-%m-%d %T";
+static const char DATE_FORMAT[] = "%Y-%m-%dT%T";
 static const char name[] = "cel-http";
 
 static int unload_module(void)
